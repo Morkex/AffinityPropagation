@@ -1,0 +1,203 @@
+extensions [matrix]
+globals[N S R A C Iter]
+
+to CreaMatrizS [Datos it]
+  set N first matrix:dimensions Datos                                                        ;inicializamos las variables necesarias
+  let M last matrix:dimensions Datos                                                         ;
+  set S matrix:make-identity N                                                               ;
+  set Iter it
+  let sumador 0                                                                              ;
+  let minsumador 0                                                                           ;
+  let row 0                                                                                  ;
+  let col 0                                                                                  ;
+  let contM 0                                                                                ;
+  while [row < N] [                                                                          ;para cada columna
+    set col row + 1
+    while [col < N] [                                                                        ;la comparamos con otra columna pero que sea mayor (las menores ya están comparadas)
+      set sumador 0
+      set contM 0
+      while [contM < M] [                                                                    ;comparamos los valores de cada casilla de ambas filas
+        let sumaux ((matrix:get Datos row contM) - (matrix:get Datos col contM))
+        set sumador sumador - sumaux ^ 2
+        set contM contM + 1
+        
+      ]
+      if sumador < minsumador[
+        set minsumador sumador
+      ]
+      matrix:set S row col sumador                                                           ;asignamos el valor obtenido a la casilla
+      matrix:set S col row sumador                                                           ;y a su simetrico
+      set col col + 1
+    ]
+    set row row + 1
+  ]
+
+  set row 0
+  while[row < N] [                                                                           ;los elementos de la diagonal
+    matrix:set S row row minsumador                                                              ;los sustituimos por el menor de los valores de la matriz
+    set row row + 1
+  ]
+  
+  show "S" show S
+  
+  if Iter > 0 [
+    set Iter Iter - 1
+    CreaMatrizR
+  ]
+  
+  
+end
+
+
+
+to CreaMatrizR
+  set R matrix:make-identity N                                                            ;declaracion de variables
+  let row 0
+  let col 0
+  let maxval 0
+  let valorEnS 0
+
+  while [row < N] [                                                                       ;recorremos cada fila
+    set col 0
+    while [col < N] [                                                                     ;recorremos cada columna
+      set maxval max remove-item col matrix:get-row S row                                 ;obtenemos el máximo valor de la fila exceptuando el valor de la propia casilla
+      set valorEnS matrix:get S row col                                                   ;valor que tenia la casilla en la matriz S
+      matrix:set R row col (valorEnS - maxval)                                            ;le restamos al valor que tenia la casilla en la matriz S el valor maximo obtenido anteriormente
+      set col col + 1
+    ]
+    set row row + 1
+  ]
+  
+  show "R" show R
+
+  if Iter > 0 [
+    set Iter Iter - 1
+    ActualizaMatrizA
+  ]
+  
+end
+
+to ActualizaMatrizR
+  set R matrix:make-identity N                                                            ;declaracion de variables
+  let row 0
+  let col 0
+  let maxval 0
+  let valorEnS 0
+
+  while [row < N] [                                                                                                                  ;recorremos cada fila
+    set col 0
+    while [col < N] [                                                                                                                ;recorremos cada columna
+      set maxval sumaFilas remove-item col matrix:get-row S row remove-item col matrix:get-row A row                                 ;obtenemos el máximo valor de la fila exceptuando el valor de la propia casilla
+      set valorEnS matrix:get S row col                                                                                              ;valor que tenia la casilla en la matriz S
+      matrix:set R row col (valorEnS - maxval)                                                                                       ;le restamos al valor que tenia la casilla en la matriz S el valor maximo obtenido anteriormente
+      set col col + 1
+    ]
+    set row row + 1
+  ]
+  
+  show "R" show R
+  
+  
+    if Iter > 0 [
+    set Iter Iter - 1
+    ActualizaMatrizA
+  ]
+  
+end
+
+to-report sumaFilas[ filaS filaA ]                                                        ;este nuevo método auxiliar nos ayudará a calcular la máxima de las sumas de los valores de las filas de A y S para utilizarlo más arriba
+  let lisSum []
+  let i 0
+  while [i < N - 1] [                                                                     ;para ello sumamos uno a uno los valores y hacemos un max de la lista obtenida
+    set lisSum lput ( item i filaS + item i filaA ) lisSum
+    set i i + 1
+  ]
+
+  report max lisSum
+end
+
+to ActualizaMatrizA
+  set A matrix:make-identity N                                                            ;declaracion de variables
+  let row 0
+  let col 0
+  let valorEnR 0
+  let valoresCol 0
+  let sumatorio 0
+
+  while [row < N] [                                                                       ;recorremos cada fila
+    set col 0
+    while [col < N] [                                                                     ;recorremos cada columna
+      set valorEnR matrix:get R col col                                                   ;valor que tenia la casilla en la matriz R
+      set valoresCol remove-item row matrix:get-column R col                              ;creamos una lista con los valores de la columna quitando el de la casilla actual
+      set sumatorio 0                                                                     ;ponemos el sumatorio a 0
+      foreach valoresCol [x -> if (x > 0) [set sumatorio sumatorio + x]]                  ;para cada valor positivo de la lista, se le suma al sumatorio
+      ifelse (row = col)[                                                                 ;si estamos en una casilla de la diagonal
+        matrix:set A row col sumatorio                                                    ;el valor que tendra sera solo el del sumatorio
+      ]
+      [
+        ifelse ((valorEnR + sumatorio) < 0) [                                             ;si (valorEnR + sumatorio) < 0
+          matrix:set A row col (valorEnR + sumatorio)                                     ;entonces guarda el valor en la casilla
+        ]
+        [
+          matrix:set A row col 0                                                          ;de lo contrario guarda un 0
+        ]
+      ]
+    set col col + 1
+    ]
+  set row row + 1
+  ]
+  
+  show "A" show A
+  
+    ActualizaMatrizR
+
+  
+end
+
+
+
+
+to CreaMatrizC
+  set C matrix:make-identity N                                                            ;declaracion de variables
+  let row 0
+  let col 0
+  let valorEnR 0
+  let valorEnA 0
+
+  while [row < N] [                                                                       ;recorremos cada fila
+    set col 0
+    while [col < N] [                                                                     ;recorremos cada columna
+      set valorEnR matrix:get R row col
+      set valorEnA matrix:get A row col
+      matrix:set C row col (valorEnR + valorEnA)                                          ;cada casilla obtiene el valor de la suma de los valores de la misma casilla en R y A
+      set col col + 1
+    ]
+  set row row + 1
+  ]
+  show "C" show C
+end
+
+
+to-report GetEjemplares
+  let res (list)                                                                          ;lista de N parejas donde el primer valor es el objeto y el segundo su ejemplar
+
+  let row 0
+  let maxval 0
+
+  while [row < N] [                                                                       ;recorremos cada fila
+    set maxval position (max  matrix:get-row C row) (matrix:get-row C row)                ;elegimos el valor maximo de la fila
+    set res lput maxval res                                                    ;añadimos la pareja de (objeto,ejemplar) a la lista res
+    set row row + 1
+  ]
+  report res
+end
+
+
+
+
+
+
+
+
+
+
