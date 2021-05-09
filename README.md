@@ -64,6 +64,7 @@ La similaridad entre dos individuos la hemos definido de forma que podamos expre
 
 La similaridad es la distancia euclídea entre dos puntos en negativo. Cuanto mayor es la distancia entre dos puntos, menor es la similaridad entre ellos.
 Aplicamos esto a todas las filas y columnas, obteniendo entonces una matriz cuadrada.
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/similaridad1.PNG?raw=true)
 
 ####  ¿Por qué lo hacemos así?
@@ -77,6 +78,7 @@ Es por ello, que usamos el valor mínimo obtenido en la diagonal, haciendo así 
 ### Matriz de Responsabilidad
 ###### Función CreaMatrizR y Actualiza en la biblioteca AP.nls
 La responsabilidad cuantifica como de bien elegido es un individuo k para ser un ejemplar del individuo i, teniendo en cuenta el individuo más cercano de esa misma columna. Usamos la siguiente fórmula:
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/Fresponsabilidad.PNG?raw=true)
 
 
@@ -86,10 +88,12 @@ r(i, k) es el valor relativo de similaridad entre i y k, comparado con los demá
 ### Matriz de Disponibilidad
 ###### Función ActualizaMatrizA en la biblioteca AP.nls
 La disponibilidad mide como de bueno es un ejemplar para un individuo con respecto a los individuos que representa tal ejemplar. Esto es calculado con la siguiente fórmula:
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/Fdisponibilidad1.PNG?raw=true)
 
 La disponibilidad es auto-responsable de k más las responsabilidades positivas o K con respecto a otros individuos que no sean i. Sólo incluimos las responsabilidades positivas ya que el ejemplar debe ser positivamente responsable y justificar algunos individuos, independientemente de lo mal que justifique los otros individuos. Si la responsabilidad es negativa, significa que k es más adecuado para ser representado por un ejemplar que serlo. El valor máximo de a(i, k) es 0.
 Las disponibilidades propias se calculan así:
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/Fdisponibilidad2.PNG?raw=true)
 
 a(k, k) refleja la evidencia acumulada de que el punto k es adecuado para ser un ejemplo, basado en las responsabilidades positivas de k hacia otros elementos. 
@@ -97,9 +101,11 @@ a(k, k) refleja la evidencia acumulada de que el punto k es adecuado para ser un
 ### Matriz de Criterio
 ###### Función CreaMatrizC en la biblioteca AP.nls
 La Matriz de Criterio se calcula después de que finalice las actualizaciones de R y A iterativamente. La Matriz de Criterios es la suma de R con A. Un individuo i se asignará a un ejemplar k que es responsable y está disponible para i.
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/Fcriterio.PNG?raw=true)
 
 El elemento con el valor de criterio más alto de cada fila sería el ejemplar. Los elementos correspondientes a las filas que comparten el mismo ejemplar se agrupan en el mismo cluster.
+
 ![image](https://github.com/Morkex/AffinityPropagation/blob/main/Images/criterio.PNG?raw=true)
 
 En este caso A es el ejemplar de B y de C (Y de sí mismo). Además, D es el ejemplar de E.
